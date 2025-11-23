@@ -253,7 +253,7 @@ const BookParcelModal = ({ isOpen, onClose }) => {
               <h3 className="text-[#E9EB77] font-bold text-lg mb-4 flex items-center gap-2">
                 <FaBox /> Parcel Details
               </h3>
-              <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid md:grid-cols-1 gap-4">
                 <input
                   type="number"
                   name="weight"
@@ -263,24 +263,30 @@ const BookParcelModal = ({ isOpen, onClose }) => {
                   className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:outline-none focus:border-[#E9EB77]"
                   required
                 />
-                <input
-                  type="text"
-                  name="pickupCity"
-                  placeholder="Pickup City"
-                  value={formData.pickupCity}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:outline-none focus:border-[#E9EB77]"
-                  required
-                />
-                <input
-                  type="text"
-                  name="deliveryCity"
-                  placeholder="Delivery City"
-                  value={formData.deliveryCity}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:outline-none focus:border-[#E9EB77]"
-                  required
-                />
+                <div>
+                  <label className="text-gray-300 text-sm font-semibold block mb-2">Pickup City (Where package starts)</label>
+                  <input
+                    type="text"
+                    name="pickupCity"
+                    placeholder="Enter pickup city"
+                    value={formData.pickupCity}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:outline-none focus:border-[#E9EB77]"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="text-gray-300 text-sm font-semibold block mb-2">Delivery City (Where package goes)</label>
+                  <input
+                    type="text"
+                    name="deliveryCity"
+                    placeholder="Enter delivery city"
+                    value={formData.deliveryCity}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:outline-none focus:border-[#E9EB77]"
+                    required
+                  />
+                </div>
                 <textarea
                   name="note"
                   placeholder="Special Instructions (Optional)"

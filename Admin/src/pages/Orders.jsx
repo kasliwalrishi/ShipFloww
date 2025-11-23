@@ -7,11 +7,30 @@ const Orders = () => {
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
-  const [costInput, setCostInput] = useState("");
+  const [branches, setBranches] = useState([]);
+  const [parcelFormData, setParcelFormData] = useState({
+    weight: "",
+    cost: "",
+    note: "",
+    originBranch: "",
+    destinationBranch: "",
+    date: new Date().toISOString().split("T")[0],
+  });
 
   useEffect(() => {
     fetchOrders();
+    fetchBranches();
   }, []);
+
+  const fetchBranches = async () => {
+    try {
+      const res = await publicRequest.get("/branches");
+      setBranches(res.data);
+    } catch (error) {
+      alert("Failed to fetch branches");
+      console.error(error);
+    }
+  };
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -31,26 +50,51 @@ const Orders = () => {
   const handleViewDetails = (order) => {
     setSelectedOrder(order);
     setShowDetailModal(true);
-    setCostInput("");
+    setParcelFormData({
+      weight: order.weight || "",
+      cost: "",
+      note: order.note || "",
+      originBranch: order.originBranch?._id || "",
+      destinationBranch: order.destinationBranch?._id || "",
+      date: new Date().toISOString().split("T")[0],
+    });
+  };
+
+  const handleParcelFormChange = (field, value) => {
+    setParcelFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
   };
 
   const handleApprove = async (orderId) => {
-    if (!costInput) {
-      alert("Please enter a cost for the parcel");
+    // Validation
+    if (!parcelFormData.weight || !parcelFormData.cost || !parcelFormData.originBranch || !parcelFormData.destinationBranch) {
+      alert("Please fill in all required parcel fields (weight, cost, branches)");
+      return;
+    }
+
+    if (parcelFormData.originBranch === parcelFormData.destinationBranch) {
+      alert("Origin and destination branches must be different");
       return;
     }
 
     try {
-      const res = await publicRequest.post(`/orders/${orderId}/approve`, {
-        cost: parseFloat(costInput),
-      });
+      const res = await publicRequest.post(`/orders/${orderId}/approve`, parcelFormData);
       alert("Order approved and parcel created successfully!");
       setShowDetailModal(false);
       setSelectedOrder(null);
-      setCostInput("");
+      setParcelFormData({
+        weight: "",
+        cost: "",
+        note: "",
+        originBranch: "",
+        destinationBranch: "",
+        date: new Date().toISOString().split("T")[0],
+      });
       fetchOrders();
     } catch (error) {
-      alert("Failed to approve order");
+      alert("Failed to approve order: " + (error.response?.data?.message || error.message));
       console.error(error);
     }
   };
@@ -266,16 +310,106 @@ const Orders = () => {
                   </div>
                 </div>
 
-                {/* Cost Input */}
-                <div>
-                  <h3 className="text-[#E9EB77] font-bold text-lg mb-3">Set Parcel Cost</h3>
-                  <input
-                    type="number"
-                    placeholder="Enter parcel cost"
-                    value={costInput}
-                    onChange={(e) => setCostInput(e.target.value)}
-                    className="w-full px-4 py-3 bg-gray-700 text-white rounded-lg border border-gray-600 focus:outline-none focus:border-[#E9EB77]"
-                  />
+                {/* Parcel Details Form */}
+                <div className="border-t border-gray-700 pt-6">
+                  <h3 className="text-[#E9EB77] font-bold text-lg mb-4">Complete Parcel Details</h3>
+                  
+                  {/* Weight and Cost */}
+                  <div className="grid md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <label className="block text-gray-300 text-sm font-semibold mb-2">
+                        Weight (kg) <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        min="0"
+                        placeholder="Enter weight"
+                        value={parcelFormData.weight}
+                        onChange={(e) => handleParcelFormChange('weight', e.target.value)}
+                        className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:outline-none focus:border-[#E9EB77]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-gray-300 text-sm font-semibold mb-2">
+                        Cost (PKR) <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="number"
+                        step="1"
+                        min="0"
+                        placeholder="Enter parcel cost"
+                        value={parcelFormData.cost}
+                        onChange={(e) => handleParcelFormChange('cost', e.target.value)}
+                        className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:outline-none focus:border-[#E9EB77]"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Note */}
+                  <div className="mb-4">
+                    <label className="block text-gray-300 text-sm font-semibold mb-2">
+                      Note / Instructions
+                    </label>
+                    <textarea
+                      placeholder="Add any special instructions or notes"
+                      value={parcelFormData.note}
+                      onChange={(e) => handleParcelFormChange('note', e.target.value)}
+                      rows="3"
+                      className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:outline-none focus:border-[#E9EB77]"
+                    />
+                  </div>
+
+                  {/* Branches */}
+                  <div className="grid md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <label className="block text-gray-300 text-sm font-semibold mb-2">
+                        Origin Branch <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        value={parcelFormData.originBranch}
+                        onChange={(e) => handleParcelFormChange('originBranch', e.target.value)}
+                        className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:outline-none focus:border-[#E9EB77]"
+                      >
+                        <option value="">Select Origin Branch</option>
+                        {branches.map((branch) => (
+                          <option key={branch._id} value={branch._id}>
+                            {branch.name} - {branch.city}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-gray-300 text-sm font-semibold mb-2">
+                        Destination Branch <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        value={parcelFormData.destinationBranch}
+                        onChange={(e) => handleParcelFormChange('destinationBranch', e.target.value)}
+                        className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:outline-none focus:border-[#E9EB77]"
+                      >
+                        <option value="">Select Destination Branch</option>
+                        {branches.map((branch) => (
+                          <option key={branch._id} value={branch._id}>
+                            {branch.name} - {branch.city}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Date */}
+                  <div className="mb-4">
+                    <label className="block text-gray-300 text-sm font-semibold mb-2">
+                      Parcel Date <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="date"
+                      value={parcelFormData.date}
+                      onChange={(e) => handleParcelFormChange('date', e.target.value)}
+                      className="w-full px-4 py-2 bg-gray-700 text-white rounded-lg border border-gray-600 focus:outline-none focus:border-[#E9EB77]"
+                    />
+                  </div>
                 </div>
 
                 {/* Action Buttons */}

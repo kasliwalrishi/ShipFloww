@@ -1,6 +1,19 @@
 const router = require("express").Router();
 const Order = require("../models/Order");
 const Parcel = require("../models/Parcel");
+const User = require("../models/User");
+const CryptoJs = require("crypto-js");
+const { sendOrderApprovalEmail } = require("../services/OrderApprovalEmail");
+
+// Helper function to generate random password
+const generateRandomPassword = () => {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$";
+  let password = "";
+  for (let i = 0; i < 12; i++) {
+    password += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return password;
+};
 
 // CREATE NEW ORDER
 router.post("/", async (req, res) => {
@@ -73,7 +86,16 @@ router.post("/:id/approve", async (req, res) => {
       return res.status(400).json({ message: "Order already approved" });
     }
 
-    // Create parcel from order data
+    // Validate required fields from request
+    const { weight, cost, originBranch, destinationBranch, note = "", date } = req.body;
+    
+    if (!weight || !cost || !originBranch || !destinationBranch) {
+      return res.status(400).json({ 
+        message: "Missing required fields: weight, cost, originBranch, destinationBranch" 
+      });
+    }
+
+    // Create parcel with all provided fields
     const newParcel = new Parcel({
       from: order.pickupCity,
       to: order.deliveryCity,
@@ -81,16 +103,63 @@ router.post("/:id/approve", async (req, res) => {
       recipientname: order.recipientName,
       senderemail: order.senderEmail,
       recipientemail: order.recipientEmail,
-      weight: order.weight,
-      note: order.note,
-      status: 1, // Pending status
-      originBranch: order.originBranch._id,
-      destinationBranch: order.destinationBranch._id,
-      cost: req.body.cost || 0,
-      date: new Date().toISOString(),
+      weight: weight,
+      cost: cost,
+      note: note,
+      date: date || new Date().toISOString(),
+      status: 0, // Set to 0 so background service sends pending notification emails
+      originBranch: originBranch,
+      destinationBranch: destinationBranch,
     });
 
     const savedParcel = await newParcel.save();
+
+    // Auto-create user for sender if they don't exist
+    let createdUser = null;
+    let generatedPassword = null;
+    try {
+      const existingUser = await User.findOne({ email: order.senderEmail });
+      
+      if (!existingUser) {
+        // Generate random password
+        generatedPassword = generateRandomPassword();
+        
+        // Encrypt password
+        const hashedPassword = CryptoJs.AES.encrypt(
+          generatedPassword,
+          process.env.PASS
+        ).toString();
+
+        // Create new user with status 0 (for email notification)
+        createdUser = new User({
+          fullname: order.senderName,
+          email: order.senderEmail,
+          age: 0,
+          country: "Pakistan", // Default country
+          address: order.senderCity,
+          password: hashedPassword,
+          status: 0, // Set to 0 for background service to send welcome email
+          role: "user",
+        });
+
+        await createdUser.save();
+        
+        // Send order approval email with tracking ID and credentials
+        await sendOrderApprovalEmail(
+          order.senderEmail,
+          order.senderName,
+          generatedPassword,
+          savedParcel._id.toString(),
+          order.recipientName,
+          order.deliveryCity,
+          weight,
+          cost
+        );
+      }
+    } catch (userError) {
+      console.error("Error creating user or sending email:", userError);
+      // Continue anyway - don't fail the parcel creation
+    }
 
     // Update order status to Approved
     order.status = "Approved";
@@ -100,6 +169,8 @@ router.post("/:id/approve", async (req, res) => {
       message: "Order approved and parcel created successfully",
       parcel: savedParcel,
       order: order,
+      userCreated: createdUser ? true : false,
+      userEmail: createdUser ? createdUser.email : null,
     });
   } catch (err) {
     res.status(500).json(err);

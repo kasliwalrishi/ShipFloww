@@ -21,7 +21,7 @@ const sendWelcomeEmail = async (fullname, password, email) => {
           let messageoption = {
             from: process.env.EMAIL,
             to: user.email,
-            subject: "Welcome to SendIT",
+            subject: "Welcome to ShipFloww",
             html: data,
           };
 
