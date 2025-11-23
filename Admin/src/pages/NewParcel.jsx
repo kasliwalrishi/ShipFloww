@@ -1,10 +1,26 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { publicRequest } from "../requestMethods";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const NewParcel = () => {
   const [inputs, setInputs] = useState({});
+  const [branches, setBranches] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    fetchBranches();
+  }, []);
+
+  const fetchBranches = async () => {
+    try {
+      const response = await publicRequest.get("/branches");
+      setBranches(response.data);
+    } catch (error) {
+      console.log("Error fetching branches:", error);
+      toast.error("Failed to load branches");
+    }
+  };
 
   const handleChange = (e) => {
     setInputs((prev) => {
@@ -14,6 +30,29 @@ const NewParcel = () => {
 
   const handleSubmit = async () => {
     try {
+      // Validate required fields
+      if (
+        !inputs.from ||
+        !inputs.to ||
+        !inputs.sendername ||
+        !inputs.recipientname ||
+        !inputs.senderemail ||
+        !inputs.recipientemail ||
+        !inputs.weight ||
+        !inputs.cost ||
+        !inputs.originBranch ||
+        !inputs.destinationBranch
+      ) {
+        toast.error("All fields including branches are required");
+        return;
+      }
+
+      if (inputs.originBranch === inputs.destinationBranch) {
+        toast.error("Origin and destination branches must be different");
+        return;
+      }
+
+      setLoading(true);
       await publicRequest.post("/parcels", inputs);
 
       // Clear the input fields
@@ -26,15 +65,19 @@ const NewParcel = () => {
     } catch (error) {
       console.log(error);
       toast.error("Failed to post the parcel. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="m-[30px] bg-[#fff] p-[20px]">
-      <h2 className="font-semibold">New Parcel</h2>
+      <h2 className="font-semibold text-2xl mb-6">New Parcel</h2>
 
-      <div className="flex">
-        <div className="m-[20px]">
+      <div className="flex flex-col lg:flex-row gap-8">
+        <div className="flex-1">
+          <h3 className="text-lg font-semibold mb-4 text-gray-700">Location & Details</h3>
+          
           <div className="flex flex-col my-[20px]">
             <label htmlFor="">From</label>
             <input
@@ -43,7 +86,7 @@ const NewParcel = () => {
               name="from"
               value={inputs.from || ""}
               onChange={handleChange}
-              className="border-2 border-[#555] border-solid p-[10px] w-[300px]"
+              className="border-2 border-[#555] border-solid p-[10px] w-full"
             />
           </div>
           <div className="flex flex-col my-[20px]">
@@ -54,9 +97,46 @@ const NewParcel = () => {
               name="to"
               value={inputs.to || ""}
               onChange={handleChange}
-              className="border-2 border-[#555] border-solid p-[10px] w-[300px]"
+              className="border-2 border-[#555] border-solid p-[10px] w-full"
             />
           </div>
+
+          <div className="flex flex-col my-[20px]">
+            <label htmlFor="">Origin Branch *</label>
+            <select
+              name="originBranch"
+              value={inputs.originBranch || ""}
+              onChange={handleChange}
+              className="border-2 border-[#555] border-solid p-[10px] w-full bg-white"
+              required
+            >
+              <option value="">Select Origin Branch</option>
+              {branches.map((branch) => (
+                <option key={branch._id} value={branch._id}>
+                  {branch.name} - {branch.city}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex flex-col my-[20px]">
+            <label htmlFor="">Destination Branch *</label>
+            <select
+              name="destinationBranch"
+              value={inputs.destinationBranch || ""}
+              onChange={handleChange}
+              className="border-2 border-[#555] border-solid p-[10px] w-full bg-white"
+              required
+            >
+              <option value="">Select Destination Branch</option>
+              {branches.map((branch) => (
+                <option key={branch._id} value={branch._id}>
+                  {branch.name} - {branch.city}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <div className="flex flex-col my-[20px]">
             <label htmlFor="">Sender Name</label>
             <input
@@ -65,7 +145,7 @@ const NewParcel = () => {
               name="sendername"
               value={inputs.sendername || ""}
               onChange={handleChange}
-              className="border-2 border-[#555] border-solid p-[10px] w-[300px]"
+              className="border-2 border-[#555] border-solid p-[10px] w-full"
             />
           </div>
           <div className="flex flex-col my-[20px]">
@@ -76,9 +156,14 @@ const NewParcel = () => {
               name="recipientname"
               value={inputs.recipientname || ""}
               onChange={handleChange}
-              className="border-2 border-[#555] border-solid p-[10px] w-[300px]"
+              className="border-2 border-[#555] border-solid p-[10px] w-full"
             />
           </div>
+        </div>
+
+        <div className="flex-1">
+          <h3 className="text-lg font-semibold mb-4 text-gray-700">Contact & Shipping Info</h3>
+          
           <div className="flex flex-col my-[20px]">
             <label htmlFor="">Sender Email</label>
             <input
@@ -88,7 +173,7 @@ const NewParcel = () => {
               name="senderemail"
               value={inputs.senderemail || ""}
               onChange={handleChange}
-              className="border-2 border-[#555] border-solid p-[10px] w-[300px]"
+              className="border-2 border-[#555] border-solid p-[10px] w-full"
             />
           </div>
           <div className="flex flex-col my-[20px]">
@@ -99,13 +184,11 @@ const NewParcel = () => {
               name="recipientemail"
               value={inputs.recipientemail || ""}
               onChange={handleChange}
-              className="border-2 border-[#555] border-solid p-[10px] w-[300px]"
+              className="border-2 border-[#555] border-solid p-[10px] w-full"
               required
             />
           </div>
-        </div>
 
-        <div className="m-[20px]">
           <div className="flex flex-col my-[20px]">
             <label htmlFor="">Weight</label>
             <input
@@ -114,7 +197,7 @@ const NewParcel = () => {
               name="weight"
               value={inputs.weight || ""}
               onChange={handleChange}
-              className="border-2 border-[#555] border-solid p-[10px] w-[300px]"
+              className="border-2 border-[#555] border-solid p-[10px] w-full"
             />
           </div>
           <div className="flex flex-col my-[20px]">
@@ -125,7 +208,7 @@ const NewParcel = () => {
               name="cost"
               value={inputs.cost || ""}
               onChange={handleChange}
-              className="border-2 border-[#555] border-solid p-[10px] w-[300px]"
+              className="border-2 border-[#555] border-solid p-[10px] w-full"
             />
           </div>
           <div className="flex flex-col my-[20px]">
@@ -136,7 +219,7 @@ const NewParcel = () => {
               name="date"
               value={inputs.date || ""}
               onChange={handleChange}
-              className="border-2 border-[#555] border-solid p-[10px] w-[300px]"
+              className="border-2 border-[#555] border-solid p-[10px] w-full"
             />
           </div>
           <div className="flex flex-col my-[20px]">
@@ -147,14 +230,15 @@ const NewParcel = () => {
               value={inputs.note || ""}
               onChange={handleChange}
               type="text"
-              className="border-2 border-[#555] border-solid p-[10px] w-[300px]"
+              className="border-2 border-[#555] border-solid p-[10px] w-full"
             />
           </div>
           <button
-            className="bg-[#1E1E1E] cursor-pointer text-white p-[10px] w-[300px]"
+            className="bg-[#1E1E1E] cursor-pointer text-white p-[10px] w-full font-semibold hover:bg-[#333] transition-all"
             onClick={handleSubmit}
+            disabled={loading}
           >
-            Create
+            {loading ? "Creating..." : "Create Parcel"}
           </button>
           <ToastContainer />
         </div>

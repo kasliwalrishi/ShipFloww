@@ -14,7 +14,7 @@ const Footer = () => {
 
       {/* Footer Right Side */}
       <ul className="m-[20px] text-[#0b0b0b] font-semibold">
-        <li>Admin</li>
+        <li>ShipFloww❤️</li>
         <li>&copy; 2025</li>
       </ul>
 

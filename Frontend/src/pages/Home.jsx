@@ -2,8 +2,12 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { Link } from "react-router-dom";
 import { FaBox, FaCog } from "react-icons/fa";
+import { useState } from "react";
+import BookParcelModal from "../components/BookParcelModal";
 
 const Home = () => {
+  const [isBookParcelOpen, setIsBookParcelOpen] = useState(false);
+
   return (
     <div>
       <Navbar />
@@ -21,6 +25,15 @@ const Home = () => {
 
               {/* Buttons Section */}
               <div className="flex flex-col sm:flex-row gap-6">
+                {/* Book Parcel Button */}
+                <button
+                  onClick={() => setIsBookParcelOpen(true)}
+                  className="group flex items-center justify-center gap-3 bg-gradient-to-r from-green-500 to-green-600 hover:shadow-2xl hover:shadow-green-500/40 text-white font-bold py-4 px-8 rounded-xl transition-all duration-300 transform hover:scale-105 active:scale-95"
+                >
+                  <FaBox className="text-lg" />
+                  <span>Book Parcel</span>
+                </button>
+
                 {/* User Login Button */}
                 <Link
                   to="/login"
@@ -68,6 +81,7 @@ const Home = () => {
         </div>
       </div>
       <Footer />
+      <BookParcelModal isOpen={isBookParcelOpen} onClose={() => setIsBookParcelOpen(false)} />
     </div>
   );
 };

@@ -5,6 +5,8 @@ import {
   FaBox,
   FaCog,
   FaSignOutAlt,
+  FaMapMarkerAlt,
+  FaClipboardList,
 } from "react-icons/fa";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
@@ -29,8 +31,10 @@ const Menu = () => {
   ];
 
   const managementItems = [
+    { path: "/orders", label: "Orders Received", icon: FaClipboardList },
     { path: "/parcels", label: "Parcels", icon: FaBox },
     { path: "/users", label: "Users", icon: FaUsers },
+    { path: "/branches", label: "Branches", icon: FaMapMarkerAlt },
   ];
 
   const settingsItems = [

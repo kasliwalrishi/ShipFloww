@@ -5,6 +5,8 @@ import Menu from "./components/Menu";
 import Home from "./pages/Home";
 import Parcels from "./pages/Parcels";
 import Users from "./pages/Users";
+import Branches from "./pages/Branches";
+import Orders from "./pages/Orders";
 import NewParcel from "./pages/NewParcel";
 import NewUsers from "./pages/NewUsers";
 import Parcel from "./pages/Parcel";
@@ -57,6 +59,16 @@ function App() {
         {
           path: "/users",
           element: <Users />,
+        },
+
+        {
+          path: "/branches",
+          element: <Branches />,
+        },
+
+        {
+          path: "/orders",
+          element: <Orders />,
         },
         
         {

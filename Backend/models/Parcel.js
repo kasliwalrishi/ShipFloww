@@ -13,6 +13,8 @@ const ParcelSchema = mongoose.Schema(
     note: { type: String},
     feedback: { type: String},
     status: { type: Number, default:0},
+    originBranch: { type: mongoose.Schema.Types.ObjectId, ref: "Branch", required: true },
+    destinationBranch: { type: mongoose.Schema.Types.ObjectId, ref: "Branch", required: true },
   },
   { timestamps: true }
 );

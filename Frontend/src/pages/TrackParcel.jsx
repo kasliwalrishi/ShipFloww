@@ -10,6 +10,7 @@ import {
   FaNotesMedical,
   FaClock,
   FaCheckCircle,
+  FaPhone,
 } from "react-icons/fa";
 import axios from "axios";
 
@@ -265,6 +266,81 @@ const TrackParcel = () => {
                 </div>
               </div>
             </div>
+
+            {/* Branch Information */}
+            {parcelData.originBranch && parcelData.destinationBranch && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Origin Branch */}
+                <div className="bg-white rounded-lg shadow-lg p-8 border-l-4 border-green-500">
+                  <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <FaMapMarkerAlt className="text-green-500" />
+                    Origin Branch
+                  </h3>
+                  <div className="space-y-3">
+                    <div>
+                      <p className="text-gray-500 text-sm font-semibold">Branch Name</p>
+                      <p className="text-gray-900 font-semibold">{parcelData.originBranch.name}</p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-gray-500 text-sm font-semibold">City</p>
+                        <p className="text-gray-900 font-semibold">{parcelData.originBranch.city}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500 text-sm font-semibold">State</p>
+                        <p className="text-gray-900 font-semibold">{parcelData.originBranch.state}</p>
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-gray-500 text-sm font-semibold">Address</p>
+                      <p className="text-gray-900 font-semibold text-sm">{parcelData.originBranch.address}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-500 text-sm font-semibold flex items-center gap-2">
+                        <FaPhone className="text-green-500" />
+                        Phone
+                      </p>
+                      <p className="text-gray-900 font-semibold">{parcelData.originBranch.phone}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Destination Branch */}
+                <div className="bg-white rounded-lg shadow-lg p-8 border-l-4 border-red-500">
+                  <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <FaMapMarkerAlt className="text-red-500" />
+                    Destination Branch
+                  </h3>
+                  <div className="space-y-3">
+                    <div>
+                      <p className="text-gray-500 text-sm font-semibold">Branch Name</p>
+                      <p className="text-gray-900 font-semibold">{parcelData.destinationBranch.name}</p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-gray-500 text-sm font-semibold">City</p>
+                        <p className="text-gray-900 font-semibold">{parcelData.destinationBranch.city}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500 text-sm font-semibold">State</p>
+                        <p className="text-gray-900 font-semibold">{parcelData.destinationBranch.state}</p>
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-gray-500 text-sm font-semibold">Address</p>
+                      <p className="text-gray-900 font-semibold text-sm">{parcelData.destinationBranch.address}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-500 text-sm font-semibold flex items-center gap-2">
+                        <FaPhone className="text-red-500" />
+                        Phone
+                      </p>
+                      <p className="text-gray-900 font-semibold">{parcelData.destinationBranch.phone}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Notes */}
             {parcelData.note && (

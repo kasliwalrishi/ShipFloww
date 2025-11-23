@@ -63,6 +63,12 @@ const Parcel = () => {
               <li className="mt-3">To : <span className="text-white">{parcel.to}</span></li>
               <li className="mt-3">Cost : <span className="text-white">${parcel.cost}</span></li>
               <li className="mt-3">Receiver : <span className="text-white">{parcel.recipientname}</span></li>
+              {parcel.originBranch && (
+                <li className="mt-3">Origin Branch: <span className="text-[#ffd400]">{parcel.originBranch.name} ({parcel.originBranch.city})</span></li>
+              )}
+              {parcel.destinationBranch && (
+                <li className="mt-3">Destination Branch: <span className="text-[#ffd400]">{parcel.destinationBranch.name} ({parcel.destinationBranch.city})</span></li>
+              )}
               <li className="mt-3">
                 <span className="text-[#e6e6e6]">Tracking ID: </span>
                 <span className="text-[#ffd400] font-mono text-sm cursor-pointer hover:text-white transition flex items-center gap-2 mt-1">

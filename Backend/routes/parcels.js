@@ -18,7 +18,10 @@ router.post("/", async (req, res) => {
 
 router.get("/", async (req, res) => {
   try {
-    const parcels = await Parcel.find().sort({ createdAt: -1 });
+    const parcels = await Parcel.find()
+      .populate("originBranch")
+      .populate("destinationBranch")
+      .sort({ createdAt: -1 });
     res.status(200).json(parcels);
   } catch (error) {
     res.status(500).json(error);
@@ -38,7 +41,9 @@ router.get("/track/:trackingId", async (req, res) => {
       });
     }
 
-    const parcel = await Parcel.findById(trackingId);
+    const parcel = await Parcel.findById(trackingId)
+      .populate("originBranch")
+      .populate("destinationBranch");
 
     if (!parcel) {
       return res.status(404).json({
@@ -74,9 +79,12 @@ router.get("/stats/overview", async (req, res) => {
 // GET USERS PARCEL
 router.post("/me", async (req, res) => {
   try {
-    const parcels = await Parcel.find({ senderemail: req.body.email }).sort({
-      createdAt: -1,
-    });
+    const parcels = await Parcel.find({ senderemail: req.body.email })
+      .populate("originBranch")
+      .populate("destinationBranch")
+      .sort({
+        createdAt: -1,
+      });
     res.status(200).json(parcels);
   } catch (error) {
     res.status(500).json(error);
@@ -91,7 +99,9 @@ router.put("/:id", async (req, res) => {
       req.params.id,
       { $set: req.body },
       { new: true }
-    );
+    )
+      .populate("originBranch")
+      .populate("destinationBranch");
     res.status(201).json(parcel);
   } catch (error) {
     res.status(500).json(error);
@@ -102,7 +112,9 @@ router.put("/:id", async (req, res) => {
 
 router.get("/find/:id", async (req, res) => {
   try {
-    const parcel = await Parcel.findById(req.params.id);
+    const parcel = await Parcel.findById(req.params.id)
+      .populate("originBranch")
+      .populate("destinationBranch");
     res.status(200).json(parcel);
   } catch (error) {
     res.status(500).json(error);

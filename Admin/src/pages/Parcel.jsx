@@ -10,6 +10,7 @@ const Parcel = () => {
   const [inputs, setInputs] = useState({});
   const [status, setStatus] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [branches, setBranches] = useState([]);
 
   // Status mapping - mapping string names to numeric values for database
   const statusOptions = [
@@ -33,6 +34,15 @@ const Parcel = () => {
   };
 
   useEffect(() => {
+    const fetchBranches = async () => {
+      try {
+        const res = await publicRequest.get("/branches");
+        setBranches(res.data);
+      } catch (error) {
+        console.log("Error fetching branches:", error);
+      }
+    };
+
     const getParcel = async () => {
       try {
         const res = await publicRequest.get("/parcels/find/" + parcelId);
@@ -44,6 +54,8 @@ const Parcel = () => {
         console.log(error);
       }
     };
+
+    fetchBranches();
     getParcel();
   }, [parcelId]);
 
@@ -78,6 +90,11 @@ const Parcel = () => {
     }
   };
 
+  const getBranchName = (branchId) => {
+    const branch = branches.find(b => b._id === branchId);
+    return branch ? `${branch.name} (${branch.city})` : "N/A";
+  };
+
   return (
     <div className="m-[30px] bg-[#fff] p-[20px]">
       <h2 className="font-semibold text-2xl mb-4">Edit Parcel</h2>
@@ -88,8 +105,10 @@ const Parcel = () => {
         </div>
       )}
 
-      <div className="flex gap-8">
-        <div className="m-[20px]">
+      <div className="flex gap-8 flex-wrap">
+        <div className="m-[20px] flex-1 min-w-[300px]">
+          <h3 className="text-lg font-semibold mb-4">Location & Branches</h3>
+          
           <div className="flex flex-col my-[20px]">
             <label htmlFor="">From</label>
             <input
@@ -98,7 +117,7 @@ const Parcel = () => {
               name="from"
               value={inputs.from || ""}
               onChange={handleChange}
-              className="border-2 border-[#555] border-solid p-[10px] w-[300px]"
+              className="border-2 border-[#555] border-solid p-[10px] w-full"
             />
           </div>
           <div className="flex flex-col my-[20px]">
@@ -109,9 +128,54 @@ const Parcel = () => {
               name="to"
               value={inputs.to || ""}
               onChange={handleChange}
-              className="border-2 border-[#555] border-solid p-[10px] w-[300px]"
+              className="border-2 border-[#555] border-solid p-[10px] w-full"
             />
           </div>
+
+          <div className="flex flex-col my-[20px]">
+            <label htmlFor="">Origin Branch</label>
+            <div className="mb-2 p-2 bg-gray-100 rounded text-sm text-gray-700">
+              Current: {getBranchName(parcel.originBranch)}
+            </div>
+            <select
+              name="originBranch"
+              value={inputs.originBranch || parcel.originBranch || ""}
+              onChange={handleChange}
+              className="border-2 border-[#555] border-solid p-[10px] w-full bg-white"
+            >
+              <option value="">Select Origin Branch</option>
+              {branches.map((branch) => (
+                <option key={branch._id} value={branch._id}>
+                  {branch.name} - {branch.city}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex flex-col my-[20px]">
+            <label htmlFor="">Destination Branch</label>
+            <div className="mb-2 p-2 bg-gray-100 rounded text-sm text-gray-700">
+              Current: {getBranchName(parcel.destinationBranch)}
+            </div>
+            <select
+              name="destinationBranch"
+              value={inputs.destinationBranch || parcel.destinationBranch || ""}
+              onChange={handleChange}
+              className="border-2 border-[#555] border-solid p-[10px] w-full bg-white"
+            >
+              <option value="">Select Destination Branch</option>
+              {branches.map((branch) => (
+                <option key={branch._id} value={branch._id}>
+                  {branch.name} - {branch.city}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div className="m-[20px] flex-1 min-w-[300px]">
+          <h3 className="text-lg font-semibold mb-4">Sender & Recipient</h3>
+          
           <div className="flex flex-col my-[20px]">
             <label htmlFor="">Sender Name</label>
             <input
@@ -120,7 +184,7 @@ const Parcel = () => {
               name="sendername"
               value={inputs.sendername || ""}
               onChange={handleChange}
-              className="border-2 border-[#555] border-solid p-[10px] w-[300px]"
+              className="border-2 border-[#555] border-solid p-[10px] w-full"
             />
           </div>
           <div className="flex flex-col my-[20px]">
@@ -131,7 +195,7 @@ const Parcel = () => {
               name="recipientname"
               value={inputs.recipientname || ""}
               onChange={handleChange}
-              className="border-2 border-[#555] border-solid p-[10px] w-[300px]"
+              className="border-2 border-[#555] border-solid p-[10px] w-full"
             />
           </div>
           <div className="flex flex-col my-[20px]">
@@ -142,7 +206,7 @@ const Parcel = () => {
               name="senderemail"
               value={inputs.senderemail || ""}
               onChange={handleChange}
-              className="border-2 border-[#555] border-solid p-[10px] w-[300px]"
+              className="border-2 border-[#555] border-solid p-[10px] w-full"
             />
           </div>
           <div className="flex flex-col my-[20px]">
@@ -153,12 +217,14 @@ const Parcel = () => {
               name="recipientemail"
               value={inputs.recipientemail || ""}
               onChange={handleChange}
-              className="border-2 border-[#555] border-solid p-[10px] w-[300px]"
+              className="border-2 border-[#555] border-solid p-[10px] w-full"
             />
           </div>
         </div>
 
-        <div className="m-[20px]">
+        <div className="m-[20px] flex-1 min-w-[300px]">
+          <h3 className="text-lg font-semibold mb-4">Shipping Details</h3>
+          
           <div className="flex flex-col my-[20px]">
             <label htmlFor="">Weight</label>
             <input
@@ -167,7 +233,7 @@ const Parcel = () => {
               name="weight"
               value={inputs.weight || ""}
               onChange={handleChange}
-              className="border-2 border-[#555] border-solid p-[10px] w-[300px]"
+              className="border-2 border-[#555] border-solid p-[10px] w-full"
             />
           </div>
           <div className="flex flex-col my-[20px]">
@@ -178,7 +244,7 @@ const Parcel = () => {
               name="cost"
               value={inputs.cost || ""}
               onChange={handleChange}
-              className="border-2 border-[#555] border-solid p-[10px] w-[300px]"
+              className="border-2 border-[#555] border-solid p-[10px] w-full"
             />
           </div>
           <div className="flex flex-col my-[20px]">
@@ -187,9 +253,9 @@ const Parcel = () => {
               type="date"
               placeholder="25/06/2024"
               name="date"
-              value={parcel.date || ""}
+              value={inputs.date || parcel.date || ""}
               onChange={handleChange}
-              className="border-2 border-[#555] border-solid p-[10px] w-[300px]"
+              className="border-2 border-[#555] border-solid p-[10px] w-full"
             />
           </div>
           <div className="flex flex-col my-[20px]">
@@ -200,13 +266,13 @@ const Parcel = () => {
               name="note"
               value={inputs.note || ""}
               onChange={handleChange}
-              className="border-2 border-[#555] border-solid p-[10px] w-[300px]"
+              className="border-2 border-[#555] border-solid p-[10px] w-full"
             />
           </div>
 
           {Object.keys(inputs).length > 0 && (
             <button
-              className="bg-[#1E1E1E] cursor-pointer text-white p-[10px] w-[300px] mb-[10px]"
+              className="bg-[#1E1E1E] cursor-pointer text-white p-[10px] w-full mb-[10px] font-semibold"
               onClick={handleUpdate}
             >
               Save Changes
@@ -214,7 +280,7 @@ const Parcel = () => {
           )}
         </div>
 
-        <div className="flex flex-col m-[20px] min-w-[320px]">
+        <div className="flex flex-col m-[20px] min-w-[320px] flex-1">
           <h2 className="font-semibold text-lg mb-4">Status Management</h2>
 
           <div className="flex flex-col my-[20px]">

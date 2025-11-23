@@ -99,13 +99,19 @@ const MyParcels = () => {
           <h2 className="text-[20px] text-[#ffd400] p-[20px]">My Parcels</h2>
           {data.map((parcel, index) => (
             <Link key={index} to={`/parcel/${parcel._id}`}>
-              <div className="flex justify-between bg-[#0f0f10] h-[180px] w-[60vw] m-[20px] p-[20px] cursor-pointer rounded-md shadow-inner hover:bg-[#1a1a1b] transition">
+              <div className="flex justify-between bg-[#0f0f10] min-h-[220px] w-[60vw] m-[20px] p-[20px] cursor-pointer rounded-md shadow-inner hover:bg-[#1a1a1b] transition">
                 <div className="text-[#e6e6e6] flex-1">
                   <ul>
                     <li>From: <span className="text-[#fff]">{parcel.from}</span></li>
                     <li>Weight: <span className="text-[#fff]">{parcel.weight} kg</span></li>
                     <li>Date: <span className="text-[#fff]">{parcel.date}</span></li>
                     <li>Sender: <span className="text-[#fff]">{parcel.sendername}</span></li>
+                    {parcel.originBranch && (
+                      <li>Origin Branch: <span className="text-[#ffd400]">{parcel.originBranch.name}</span></li>
+                    )}
+                    {parcel.destinationBranch && (
+                      <li>Destination Branch: <span className="text-[#ffd400]">{parcel.destinationBranch.name}</span></li>
+                    )}
                     <li className="text-xs mt-2">
                       Tracking ID: 
                       <span className="text-[#ffd400] font-mono text-[11px] ml-1">
