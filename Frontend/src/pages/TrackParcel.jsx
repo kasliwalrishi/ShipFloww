@@ -126,7 +126,7 @@ const TrackParcel = () => {
               onChange={(e) => setTrackingId(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Enter Tracking ID (24-character ID)"
-              className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 transition"
+              className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 transition text-black"
             />
             <button
               onClick={handleSearch}
